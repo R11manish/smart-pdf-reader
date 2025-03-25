@@ -7,7 +7,6 @@ from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain.graphs import StateGraph
 from langchain_core.runnables import RunnablePassthrough
-from .state_manager import AgentStateManager
 
 class PDFAIAgent:
     def __init__(self, openai_api_key: str):
@@ -19,7 +18,6 @@ class PDFAIAgent:
         self.search = DuckDuckGoSearchRun()
         self.tools = self._create_tools()
         self.workflow = self._create_workflow()
-        self.state_manager = AgentStateManager()
         self.context = []
 
     def _create_tools(self) -> List[Tool]:
@@ -105,24 +103,16 @@ class PDFAIAgent:
 
         return workflow.compile()
 
-    def set_context(self, session_id: str, documents: List[str], metadata: List[Dict[str, Any]]) -> None:
-        """Set the PDF context for the agent and persist it."""
-        self.context = []
-        for doc, meta in zip(documents, metadata):
-            self.context.append({
-                "content": doc,
-                "metadata": meta
-            })
-        self.state_manager.save_state(session_id, self.context)
+    def set_context(self, documents: List[str], metadata: List[Dict[str, Any]]) -> None:
+        """Set the PDF context for the agent."""
+        self.context = [
+            {"content": doc, "metadata": meta}
+            for doc, meta in zip(documents, metadata)
+        ]
 
-    def load_context(self, session_id: str) -> None:
-        """Load context from persistent storage."""
-        self.context = self.state_manager.load_state(session_id)
-
-    def clear_context(self, session_id: str) -> None:
+    def clear_context(self) -> None:
         """Clear the agent's context."""
         self.context = []
-        self.state_manager.clear_state(session_id)
 
     async def process_query(self, query: str) -> Dict[str, Any]:
         """Process a user query using the workflow."""
@@ -137,7 +127,7 @@ class PDFAIAgent:
                 "response": response["synthesis"],
                 "sources": {
                     "pdf_context": bool(self.context),
-                    "internet_search_used": True  # Now always true in this workflow
+                    "internet_search_used": True
                 }
             }
         except Exception as e:
