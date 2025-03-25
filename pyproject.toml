@@ -1,23 +1,24 @@
-[project]
+[tool.poetry]
 name = "smart-pdf-reader"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "manish",email = "github.jmtss@gmail.com"}
-]
+authors = ["manish <github.jmtss@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.11"
-dependencies = [
-    "pymupdf (>=1.25.4,<2.0.0)",
-    "chromadb (>=0.6.3,<0.7.0)",
-    "fastapi (>=0.115.12,<0.116.0)",
-    "python-multipart (>=0.0.20,<0.0.21)",
-    "uvicorn (>=0.34.0,<0.35.0)"
-]
-
-[tool.poetry]
 packages = [{include = "smart_pdf_reader", from = "src"}]
 
+[tool.poetry.dependencies]
+python = ">=3.11,<4.0"
+pymupdf = ">=1.25.4,<2.0.0"
+chromadb = ">=0.6.3,<0.7.0"
+fastapi = ">=0.115.12,<0.116.0"
+python-multipart = ">=0.0.20,<0.0.21"
+uvicorn = ">=0.34.0,<0.35.0"
+langchain-core = ">=0.3.48,<0.4.0"
+langchain-community = ">=0.3.20,<0.4.0"
+langchain = "^0.3.21"
+langchain-openai = "^0.3.10"
+duckduckgo-search = "^7.5.3"
+python-dotenv = "^1.1.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
