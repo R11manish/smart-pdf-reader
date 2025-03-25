@@ -81,13 +81,26 @@ class PDFAIAgent:
             ("user", "{query}")
         ])
 
+        # Add end condition check
+        end_condition_prompt = ChatPromptTemplate.from_messages([
+            ("system", """Determine if the current answer is complete or needs more processing.
+            Output format: {"is_complete": true/false, "reason": "explanation"}"""),
+            ("user", "Current answer: {current_answer}")
+        ])
+        
+        end_checker = (end_condition_prompt | self.llm | JsonOutputParser())
+        
         # Add nodes
         workflow.add_node("tool_selector", tool_selector)
         workflow.add_node("pdf_search", pdf_context_prompt | self.llm)
         workflow.add_node("internet_search", internet_search_prompt | self.llm | self.search)
         workflow.add_node("synthesis", final_synthesis | self.llm)
+        workflow.add_node("end_checker", end_checker)
 
+        # Add edges with end conditions
         def route_tools(x: Dict[str, str]) -> List[str]:
+            if x.get("is_complete", False):
+                return []  # End the workflow
             if x["tool_choice"] == "both":
                 return ["pdf_search", "internet_search"]
             elif x["tool_choice"] == "pdf_context":
@@ -100,6 +113,10 @@ class PDFAIAgent:
             route_tools,
             "synthesis"
         )
+        
+        # Add end condition check
+        workflow.add_edge("synthesis", "end_checker")
+        workflow.set_finish_node("end_checker")
 
         return workflow.compile()
 
