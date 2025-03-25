@@ -1,0 +1,21 @@
+[project]
+name = "smart-pdf-reader"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "manish",email = "github.jmtss@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pymupdf (>=1.25.4,<2.0.0)",
+    "chromadb (>=0.6.3,<0.7.0)"
+]
+
+[tool.poetry]
+packages = [{include = "smart_pdf_reader", from = "src"}]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
