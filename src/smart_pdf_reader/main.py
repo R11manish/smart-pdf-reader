@@ -90,23 +90,9 @@ class PDFSearcher:
             n_results=n_results
         )
 
-# Example usage
-if __name__ == "__main__":
-    pdf_path = "clean_code.pdf"   
-    output_folder = "extracted_content"
-    
-    chroma_client = chromadb.PersistentClient(path="./chroma_db")
-    
-    # Extract PDF content
-    processor = PDFProcessor(pdf_path, output_folder, chroma_client)
-    processor.extract()
-    
-    searcher = PDFSearcher(chroma_client)
-    search_results = searcher.search("What is clean code ?")
-    
-    print("\nSearch Results:")
-    for i, (doc, metadata) in enumerate(zip(search_results['documents'][0], search_results['metadatas'][0])):
-        print(f"\nResult {i+1}:")
-        print(f"Page: {metadata['page_number']}")
-        print(f"Text: {doc[:200]}...")
-        print(f"Images: {metadata['image_paths'].split(',') if metadata['image_paths'] else []}")
+# Remove or comment out the example usage section
+# if __name__ == "__main__":
+#     pdf_path = "clean_code.pdf"   
+#     output_folder = "extracted_content"
+#     chroma_client = chromadb.PersistentClient(path="./chroma_db")
+#     ...
