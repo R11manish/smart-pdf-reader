@@ -6,22 +6,23 @@ from smart_pdf_reader.main import PDFProcessor, PDFSearcher
 from smart_pdf_reader.ai_agent import PDFAIAgent
 from typing import Optional
 from functools import lru_cache
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 import uuid
 
 class Settings(BaseSettings):
-    openai_api_key: str
+    deepseek_api_key: str
 
     class Config:
         env_file = ".env"
+        frozen = True  # Makes the settings immutable and hashable
 
 @lru_cache()
-def get_settings():
+def get_settings() -> Settings:
     return Settings()
 
 @lru_cache()
-def get_ai_agent(settings: Settings = Depends(get_settings)):
-    return PDFAIAgent(settings.openai_api_key)
+def get_ai_agent() -> PDFAIAgent:
+    return PDFAIAgent()
 
 router = APIRouter()
 
@@ -103,7 +104,6 @@ async def query_pdf(
 async def ai_query(
     query: str = Query(..., description="The question to ask"),
     session_id: str = Header(None, description="Session ID for maintaining context"),
-    settings: Settings = Depends(get_settings),
     ai_agent: PDFAIAgent = Depends(get_ai_agent)
 ):
     try:
@@ -111,20 +111,15 @@ async def ai_query(
         if not session_id:
             session_id = str(uuid.uuid4())
         
-        # Load existing context if available
-        ai_agent.load_context(session_id)
+        # Search for relevant content
+        searcher = PDFSearcher(chroma_client)
+        search_results = searcher.search(query, n_results=3)
         
-        # If no context exists, search for relevant content
-        if not ai_agent.context:
-            searcher = PDFSearcher(chroma_client)
-            search_results = searcher.search(query, n_results=3)
-            
-            # Set the context for the AI agent
-            ai_agent.set_context(
-                session_id=session_id,
-                documents=search_results['documents'][0],
-                metadata=search_results['metadatas'][0]
-            )
+        # Set the context for the AI agent
+        ai_agent.set_context(
+            documents=search_results['documents'][0],
+            metadata=search_results['metadatas'][0]
+        )
         
         # Process the query with the AI agent
         response = await ai_agent.process_query(query)

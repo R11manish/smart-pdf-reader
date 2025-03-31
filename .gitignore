@@ -78,3 +78,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg 
+chroma_db
+extracted_content
+__pycache__
+.env

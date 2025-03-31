@@ -90,9 +90,4 @@ class PDFSearcher:
             n_results=n_results
         )
 
-# Remove or comment out the example usage section
-# if __name__ == "__main__":
-#     pdf_path = "clean_code.pdf"   
-#     output_folder = "extracted_content"
-#     chroma_client = chromadb.PersistentClient(path="./chroma_db")
-#     ...
+
